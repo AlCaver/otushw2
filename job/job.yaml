@@ -1,0 +1,47 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: "myapp"
+spec:
+  template:
+    metadata:
+      name: "myapp"
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: post-install-job
+        image: mongo
+        command:
+          - /bin/sh
+          - -c
+          - >
+            mongo --host "rs0/$MDB_URL" --username "root" --password "$MDB_ROOTPASSWORD" --authenticationDatabase "admin" --eval "db = db.getSiblingDB(\"$MDB_WORKDB\"); db.createUser({ user: \"$MDB_USER\", pwd: \"$MDB_PASSWORD\", roles: [{ role: \"readWrite\", db: \"$MDB_WORKDB\" }]});";
+            
+        env:
+          - name: MDB_URL
+            valueFrom:
+              configMapKeyRef:
+                name: myapp-lab2-chart-config
+                key: MDB_URL
+          - name: MDB_WORKDB
+            valueFrom:
+              configMapKeyRef:
+                name: myapp-lab2-chart-config
+                key: MDB_WORKDB
+          - name: MDB_ROOTPASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: myapp-lab2-chart-secret
+                key: MDB_ROOTPASSWORD
+          - name: MDB_USER
+            valueFrom:
+              secretKeyRef:
+                name: myapp-lab2-chart-secret
+                key: MDB_USER
+          - name: MDB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: myapp-lab2-chart-secret
+                key: MDB_PASSWORD
+
+  backoffLimit: 0

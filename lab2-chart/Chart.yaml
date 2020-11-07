@@ -1,0 +1,16 @@
+apiVersion: v2
+name: lab2-chart
+description: Lab 2 chart
+
+type: application
+
+version: 0.1.0
+appVersion: 2.4
+
+dependencies:
+  - name: mongodb
+    version: 9.x.x
+    repository: https://charts.bitnami.com/bitnami
+    condition: mongodb.enabled
+    tags:
+      - myapp-database
